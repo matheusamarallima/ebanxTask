@@ -29,7 +29,7 @@ public class AccountController {
             return accountService.deposit(accountId, amount);
         }
         if(type.equalsIgnoreCase("withdraw")){
-            return accountService.withdraw(accountId, amount);
+            return accountService.withdraw(origin, amount);
         }
         if(type.equalsIgnoreCase("transfer")){
             return accountService.transfer(origin, accountId, amount);

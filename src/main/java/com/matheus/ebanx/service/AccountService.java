@@ -41,7 +41,7 @@ public class AccountService {
             Account account = existAccount.get();
             account.setBalance(account.getBalance() + amount);
             accounts.set(accounts.indexOf(account), account);
-            String response = String.format("{\"destination\":{\"id\":\"%d\",\"balance\":%d}", accountId, account.getBalance());
+            String response = String.format("{\"destination\": {\"id\":\"%d\", \"balance\":%d}}", accountId, account.getBalance());
             HttpHeaders headers = new HttpHeaders();
             return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
         }
@@ -49,19 +49,19 @@ public class AccountService {
         newAccount.setId(accountId);
         newAccount.setBalance(amount);
         accounts.add(newAccount);
-        String response = String.format("{\"destination\":{\"id\":\"%d\",\"balance\":%d}", accountId, newAccount.getBalance());
+        String response = String.format("{\"destination\": {\"id\":\"%d\", \"balance\":%d}}", accountId, newAccount.getBalance());
         HttpHeaders headers = new HttpHeaders();
         return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
     }
 
 
-    public ResponseEntity<String> withdraw(Integer accountId, Integer amount) {
-        Optional<Account> existAccountWithdraw = accounts.stream().filter(account -> account.getId().equals(accountId)).findFirst();
+    public ResponseEntity<String> withdraw(Integer origin, Integer amount) {
+        Optional<Account> existAccountWithdraw = accounts.stream().filter(account -> account.getId().equals(origin)).findFirst();
         if (existAccountWithdraw.isPresent()) {
             Account account = existAccountWithdraw.get();
             account.setBalance(account.getBalance() - amount);
             accounts.set(accounts.indexOf(account), account);
-            String response = String.format("{\"origin\":{\"id\":\"%d\",\"balance\":%d}", accountId, account.getBalance());
+            String response = String.format("{\"origin\": {\"id\":\"%d\", \"balance\":%d}}", origin, account.getBalance());
             HttpHeaders headers = new HttpHeaders();
             return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
         }
@@ -76,8 +76,23 @@ public class AccountService {
             Account targetAccount1 = targetAccount.get();
             originAccount1.setBalance(originAccount1.getBalance() - amount);
             targetAccount1.setBalance(targetAccount1.getBalance() + amount);
-            String response = String.format("{\"origin\":{\"id\":\"%d\",\"balance\":%d},\"destination\":{\"id\":\"%d\",\"balance\":%d}}",
+            String response = String.format("{\"origin\": {\"id\":\"%d\", \"balance\":%d}, \"destination\": {\"id\":\"%d\", \"balance\":%d}}",
                     originAccount1.getId(), originAccount1.getBalance(), targetAccount1.getId(), targetAccount1.getBalance());
+            HttpHeaders headers = new HttpHeaders();
+            return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
+        }
+        if(originAccount.isPresent()){
+            Account newAccount = new Account();
+            newAccount.setId(accountId);
+            newAccount.setBalance(amount);
+            accounts.add(newAccount);
+
+            Account originAccount1 = originAccount.get();
+            originAccount1.setBalance(originAccount1.getBalance() - amount);
+
+            String response = String.format("{\"origin\": {\"id\":\"%d\", \"balance\":%d},\"destination\": {\"id\":\"%d\", \"balance\":%d}}",
+                    originAccount1.getId(), originAccount1.getBalance(), newAccount.getId(), newAccount.getBalance());
+
             HttpHeaders headers = new HttpHeaders();
             return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
         }
