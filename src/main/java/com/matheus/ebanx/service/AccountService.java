@@ -1,6 +1,7 @@
 package com.matheus.ebanx.service;
 
 import com.matheus.ebanx.model.Account;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,7 +17,7 @@ public class AccountService {
 
     public AccountService() {
         Account initialAccount = new Account();
-        initialAccount.setAccountId(1);
+        initialAccount.setId(1);
         initialAccount.setBalance(100);
         accounts.add(initialAccount);
     }
@@ -24,14 +25,69 @@ public class AccountService {
     public ResponseEntity<Integer> checkBalance(Integer accountId) {
         Optional<Account> account = accounts.stream()
                 .filter(accountStream ->
-                        accountStream.getAccountId().equals(accountId))
+                        accountStream.getId().equals(accountId))
                 .findFirst();
 
-        if(account.isPresent()){
+        if (account.isPresent()) {
             Account account1 = account.get();
             return ResponseEntity.ok(account1.getBalance());
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(0);
     }
 
+    public ResponseEntity<String> deposit(Integer accountId, Integer amount) {
+        Optional<Account> existAccount = accounts.stream().filter(account -> account.getId().equals(accountId)).findFirst();
+        if (existAccount.isPresent()) {
+            Account account = existAccount.get();
+            account.setBalance(account.getBalance() + amount);
+            accounts.set(accounts.indexOf(account), account);
+            String response = String.format("{\"destination\": {\"id\": \"%d\", \"balance\": %d}", accountId, account.getBalance());
+            HttpHeaders headers = new HttpHeaders();
+            return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
+        }
+        Account newAccount = new Account();
+        newAccount.setId(accountId);
+        newAccount.setBalance(amount);
+        accounts.add(newAccount);
+        String response = String.format("{\"destination\": {\"id\": \"%d\", \"balance\": %d}", accountId, newAccount.getBalance());
+        HttpHeaders headers = new HttpHeaders();
+        return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
+    }
+
+
+    public ResponseEntity<String> withdraw(Integer accountId, Integer amount) {
+        Optional<Account> existAccountWithdraw = accounts.stream().filter(account -> account.getId().equals(accountId)).findFirst();
+        if (existAccountWithdraw.isPresent()) {
+            Account account = existAccountWithdraw.get();
+            account.setBalance(account.getBalance() - amount);
+            accounts.set(accounts.indexOf(account), account);
+            String response = String.format("{\"origin\": {\"id\": \"%d\", \"balance\": %d}", accountId, account.getBalance());
+            HttpHeaders headers = new HttpHeaders();
+            return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.valueOf(0));
+    }
+
+    public ResponseEntity<String> transfer(Integer origin, Integer accountId, Integer amount) {
+        Optional<Account> transferAccount = accounts.stream().filter(account -> account.getId().equals(origin)).findFirst();
+        Optional<Account> targetAccount = accounts.stream().filter(account -> account.getId().equals(accountId)).findFirst();
+        if(targetAccount.isPresent() && transferAccount.isPresent()){
+            Account transferAccount1 = transferAccount.get();
+            Account targetAccount1 = targetAccount.get();
+            transferAccount1.setBalance(transferAccount1.getBalance() - amount);
+            targetAccount1.setBalance(targetAccount1.getBalance() + amount);
+            String response = String.format("{\"origin\": {\"id\": \"%d\", \"balance\": %d}, \"destination\": {\"id\": \"%d\", \"balance\": %d}"
+                    , transferAccount1.getId(), transferAccount1.getBalance(),
+                    targetAccount1.getId(), targetAccount1.getBalance());
+
+            HttpHeaders headers = new HttpHeaders();
+            return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.valueOf(0));
+
+    }
 }
+
+
+

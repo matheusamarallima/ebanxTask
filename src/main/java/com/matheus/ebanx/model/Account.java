@@ -11,6 +11,6 @@ public class Account {
 
 
 
-    private Integer accountId;
+    private Integer id;
     private Integer balance;
 }

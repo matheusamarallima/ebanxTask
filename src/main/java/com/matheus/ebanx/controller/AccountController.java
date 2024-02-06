@@ -17,5 +17,19 @@ public class AccountController {
         return accountService.checkBalance(accountId);
     }
 
+    @PostMapping("/event")
+    public ResponseEntity<String> event(@RequestParam(value = "origin", required = false) Integer origin, @RequestParam("type") String type, @RequestParam("destination") Integer accountId, @RequestParam("amount") Integer amount){
+        if(type.equalsIgnoreCase("deposit")){
+            return accountService.deposit(accountId, amount);
+        }
+        if(type.equalsIgnoreCase("withdraw")){
+            return accountService.withdraw(accountId, amount);
+        }
+        if(type.equalsIgnoreCase("transfer")){
+            return accountService.transfer(origin, accountId, amount);
+        }
+        return null;
+    }
+
 
 }
