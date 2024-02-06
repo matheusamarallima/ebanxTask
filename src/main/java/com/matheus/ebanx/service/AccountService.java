@@ -41,7 +41,7 @@ public class AccountService {
             Account account = existAccount.get();
             account.setBalance(account.getBalance() + amount);
             accounts.set(accounts.indexOf(account), account);
-            String response = String.format("{\"destination\": {\"id\": \"%d\", \"balance\": %d}", accountId, account.getBalance());
+            String response = String.format("{\"destination\":{\"id\":\"%d\",\"balance\":%d}", accountId, account.getBalance());
             HttpHeaders headers = new HttpHeaders();
             return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
         }
@@ -49,7 +49,7 @@ public class AccountService {
         newAccount.setId(accountId);
         newAccount.setBalance(amount);
         accounts.add(newAccount);
-        String response = String.format("{\"destination\": {\"id\": \"%d\", \"balance\": %d}", accountId, newAccount.getBalance());
+        String response = String.format("{\"destination\":{\"id\":\"%d\",\"balance\":%d}", accountId, newAccount.getBalance());
         HttpHeaders headers = new HttpHeaders();
         return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
     }
@@ -61,7 +61,7 @@ public class AccountService {
             Account account = existAccountWithdraw.get();
             account.setBalance(account.getBalance() - amount);
             accounts.set(accounts.indexOf(account), account);
-            String response = String.format("{\"origin\": {\"id\": \"%d\", \"balance\": %d}", accountId, account.getBalance());
+            String response = String.format("{\"origin\":{\"id\":\"%d\",\"balance\":%d}", accountId, account.getBalance());
             HttpHeaders headers = new HttpHeaders();
             return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
         }
@@ -69,17 +69,15 @@ public class AccountService {
     }
 
     public ResponseEntity<String> transfer(Integer origin, Integer accountId, Integer amount) {
-        Optional<Account> transferAccount = accounts.stream().filter(account -> account.getId().equals(origin)).findFirst();
+        Optional<Account> originAccount = accounts.stream().filter(account -> account.getId().equals(origin)).findFirst();
         Optional<Account> targetAccount = accounts.stream().filter(account -> account.getId().equals(accountId)).findFirst();
-        if(targetAccount.isPresent() && transferAccount.isPresent()){
-            Account transferAccount1 = transferAccount.get();
+        if(targetAccount.isPresent() && originAccount.isPresent()){
+            Account originAccount1 = originAccount.get();
             Account targetAccount1 = targetAccount.get();
-            transferAccount1.setBalance(transferAccount1.getBalance() - amount);
+            originAccount1.setBalance(originAccount1.getBalance() - amount);
             targetAccount1.setBalance(targetAccount1.getBalance() + amount);
-            String response = String.format("{\"origin\": {\"id\": \"%d\", \"balance\": %d}, \"destination\": {\"id\": \"%d\", \"balance\": %d}"
-                    , transferAccount1.getId(), transferAccount1.getBalance(),
-                    targetAccount1.getId(), targetAccount1.getBalance());
-
+            String response = String.format("{\"origin\":{\"id\":\"%d\",\"balance\":%d},\"destination\":{\"id\":\"%d\",\"balance\":%d}}",
+                    originAccount1.getId(), originAccount1.getBalance(), targetAccount1.getId(), targetAccount1.getBalance());
             HttpHeaders headers = new HttpHeaders();
             return new ResponseEntity<>(response, headers, HttpStatus.CREATED);
         }
