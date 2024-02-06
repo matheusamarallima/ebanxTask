@@ -1,5 +1,6 @@
 package com.matheus.ebanx.controller;
 
+import com.matheus.ebanx.model.EventRequest;
 import com.matheus.ebanx.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,12 @@ public class AccountController {
     }
 
     @PostMapping("/event")
-    public ResponseEntity<String> event(@RequestParam(value = "origin", required = false) Integer origin, @RequestParam("type") String type, @RequestParam("destination") Integer accountId, @RequestParam("amount") Integer amount){
+    public ResponseEntity<String> event(@RequestBody EventRequest request) {
+        String type = request.getType();
+        Integer accountId = request.getDestination();
+        Integer amount = request.getAmount();
+        Integer origin = request.getOrigin();
+
         if(type.equalsIgnoreCase("deposit")){
             return accountService.deposit(accountId, amount);
         }
