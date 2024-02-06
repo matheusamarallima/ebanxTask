@@ -28,7 +28,12 @@ public class AccountController {
         if(type.equalsIgnoreCase("transfer")){
             return accountService.transfer(origin, accountId, amount);
         }
-        return null;
+        return ResponseEntity.badRequest().body("Invalid request type");
+    }
+
+    @PostMapping("/reset")
+    public ResponseEntity<String>reset(){
+        return accountService.reset();
     }
 
 

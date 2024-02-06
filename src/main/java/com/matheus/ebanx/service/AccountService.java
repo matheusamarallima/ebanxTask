@@ -87,6 +87,11 @@ public class AccountService {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.valueOf(0));
 
     }
+
+    public ResponseEntity<String> reset() {
+        accounts.clear();
+        return ResponseEntity.status(HttpStatus.OK).body("OK");
+    }
 }
 
 
